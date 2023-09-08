@@ -5,7 +5,7 @@ import numpy as np
 from train_eval import train, init_network
 from importlib import import_module
 import argparse
-from utils import build_dataset,build_reward_dataset, build_iterator, get_time_dif
+from utils import build_dataset,build_reward_dataset, build_iterator, get_time_dif,cleandata
 
 parser = argparse.ArgumentParser(description='Chinese Text Classification')
 parser.add_argument('--model', type=str, required=True, help='choose a model: Bert, ERNIE')
@@ -25,6 +25,8 @@ if __name__ == '__main__':
 
     start_time = time.time()
     print("Loading data...")
+    # cleandata(config)
+    # print("cleandata done")
     train_data, dev_data, test_data = build_reward_dataset(config)
     train_iter = build_iterator(train_data, config)
     dev_iter = build_iterator(dev_data, config)

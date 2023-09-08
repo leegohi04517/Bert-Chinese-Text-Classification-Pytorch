@@ -43,6 +43,35 @@ def build_dataset(config):
     return train, dev, test
 
 
+def cleandata(config):
+    tokenizer = AutoTokenizer.from_pretrained(
+        'bert-base-cased',
+        truncation_side='left',
+        padding_side='right'
+    )
+
+    df = pd.read_csv(config.train_path)
+    filtered_df = df[pd.notna(df['gpt_prompt']) & pd.notna(df['content'])]
+    token_ids_bert = []
+    for index, row in tqdm(filtered_df.iterrows(), total=filtered_df.shape[0]):
+        prompt_ = row['gpt_prompt']
+        content_ = row['content']
+        content = prompt_ + ' ' + content_
+        label = row['is_accepted']
+        token_ids = tokenizer(
+            content,
+            padding="max_length",
+            truncation=True,
+            max_length=config.pad_size
+        )
+        input_ids = token_ids.input_ids
+        mask = token_ids.attention_mask
+        seq_len = np.count_nonzero(np.array(mask) == 1)
+        token_ids_bert.append((input_ids, int(label), seq_len, mask))
+    filtered_df['token_ids_bert'] = token_ids_bert
+    filtered_df.to_csv('new_train.csv', index=False)
+
+
 def build_reward_dataset(config):
     def load_dataset(data_frame, tokenizer, pad_size=32):
         contents = []
@@ -112,9 +141,9 @@ def build_reward_dataset(config):
     # train_set = train_set.sample(1000)
     # val_set = val_set.sample(1000)
     # test_set = test_set.sample(1000)
-    train = load_dataset(train_set, tokenizer, config.pad_size)
-    dev = load_dataset(val_set, tokenizer, config.pad_size)
-    test = load_dataset(test_set, tokenizer, config.pad_size)
+    train = train_set['token_ids_bert'].apply(eval)
+    dev = val_set['token_ids_bert'].apply(eval)
+    test = test_set['token_ids_bert'].apply(eval)
     return train, dev, test
 
 

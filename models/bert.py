@@ -10,7 +10,7 @@ class Config(object):
     """配置参数"""
     def __init__(self, dataset):
         self.model_name = 'bert'
-        self.train_path = dataset + '/data/train.csv'                                # 训练集
+        self.train_path = dataset + '/data/new_train.csv'                                # 训练集
         # self.dev_path = dataset + '/data/dev.txt'                                    # 验证集
         # self.test_path = dataset + '/data/test.txt'                                  # 测试集
         # self.class_list = [x.strip() for x in open(
